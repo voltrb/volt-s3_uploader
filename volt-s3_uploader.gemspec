@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'aws-sdk', '~> 2.1.15'
-  spec.add_dependency 'volt', '~> 0.9.6'
+  spec.add_dependency 'volt', '~> 0.9.7.pre1'
   spec.add_development_dependency 'rspec', '~> 3.2.0'
   spec.add_development_dependency "rake"
 end
