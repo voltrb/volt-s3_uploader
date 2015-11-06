@@ -1,41 +1,19 @@
+<div class="form-group">
+  {{ if attrs.label.present? }}
+    <label class="control-label">{{ attrs.label }}</label>
+  {{ end }}
+  <input type="file" id="files" e-change="upload" name="files" />
+  {{ if progress.present? }}
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress }}%;">
+        {{ if progress > 0 }}
+          {{ progress }}% Uploaded
+        {{ end }}
+      </div>
+    </div>
+  {{ end }}
+  {{ if error_message.present? }}
+    <span class="control-label errors">{{ error_message }}</span>
+  {{ end }}
+</div>
 
-<style>
-#progress_bar {
-  width: 200px;
-  margin: 10px 0;
-  padding: 3px;
-  border: 1px solid #000;
-  font-size: 14px;
-  clear: both;
-  opacity: 0;
-  -moz-transition: opacity 1s linear;
-  -o-transition: opacity 1s linear;
-  -webkit-transition: opacity 1s linear;
-}
-#progress_bar.loading {
-  opacity: 1.0;
-}
-#progress_bar .percent {
-  background-color: #99ccff;
-  height: auto;
-  width: 0;
-}
-</style>
-
-
-<h2>File Upload</h2>
-
-<table>
-<tr>
-  <td>File selection:</td>
-  <td><input type="file" id="files" e-change="upload" name="files" multiple /></td>
-</tr>
-<tr>
-  <td>Progress:</td>
-  <td><div id="progress_bar"><div class="percent">{{ progress }}%</div></div></td>
-</tr>
-<tr>
-  <td>Status:</td>
-  <td><span id="status">{{ message }}</span></td>
-</tr>
-</table>

@@ -1,15 +1,21 @@
 module S3Uploader
   class MainController < Volt::ModelController
     reactive_accessor :progress
-    reactive_accessor :message
+    reactive_accessor :error_message
     reactive_accessor :s3_url
+    reactive_accessor :bucket
     attr_accessor :uploading_promise
 
     if RUBY_PLATFORM == 'opal'
 
+      def bucket_name
+        file_field_name = attrs.value_last_method
+        attrs.value_parent.send(file_field_name + "_bucket")
+      end
+
       def upload(event)
         target = event.target
-        set_progress(0, 'Upload started')
+        set_progress(0)
 
         file = nil
         `
@@ -24,8 +30,9 @@ module S3Uploader
 
       def upload_file(file)
         self.uploading_promise = Promise.new
+        puts "UP FILE: #{uploading_promise.inspect}"
 
-        S3UploadTasks.sign(`file.name`, `file.type`).then do |private_and_public|
+        S3UploadTasks.sign(bucket_name, `file.name`, `file.type`).then do |private_and_public|
           self.s3_url = private_and_public[1]
           upload_with_url(file, private_and_public[0])
         end.fail do |err|
@@ -36,7 +43,6 @@ module S3Uploader
       def upload_with_url(file, signed_url)
         # create PUT request to S3
         `
-        console.log('type: ', file.type);
         var xhr = new XMLHttpRequest();
         xhr.open('PUT', signed_url);
         xhr.setRequestHeader('Content-Type', file.type);
@@ -47,10 +53,8 @@ module S3Uploader
           }
         };
 
-        xhr.onerror = function(err) {
-          console.log('err1');
-          console.log('err: ', err);
-          #{error(err)}
+        xhr.onerror = function(e) {
+          self.$error(e.error || 'Upload Error');
         };
 
         xhr.upload.onprogress = function(e) {
@@ -58,7 +62,7 @@ module S3Uploader
 
           if (e.lengthComputable) {
             #{percentLoaded = `Math.round((e.loaded / e.total) * 100)`};
-            #{set_progress(percentLoaded, percentLoaded == 100 ? 'Finalizing.' : "Uploading: #{percentLoaded}")}
+            #{set_progress(percentLoaded, nil)}
           }
         };
 
@@ -73,22 +77,22 @@ module S3Uploader
         promise = self.uploading_promise
         self.uploading_promise = nil
 
-        set_progress(100, 'Uploaded...', true)
+        set_progress(100, nil, true)
         promise.resolve(nil)
       end
 
       def error(msg)
         msg = msg.to_s
         promsise = self.uploading_promise
-        self.upload_promise = nil
+        self.uploading_promise = nil
 
         set_progress(0, msg, true)
-        uploading_promise.reject(msg)
+        promsise.reject(msg)
       end
 
-      def set_progress(progress, message, done=false)
+      def set_progress(progress, error=nil, done=false)
         self.progress = progress
-        self.message = message
+        self.error_message = error
 
         if attrs.respond_to?(:value)
           attrs.value = [progress, done ? s3_url : nil, @uploading_promise]

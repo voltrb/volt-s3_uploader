@@ -8,8 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Volt::S3Uploader::VERSION
   spec.authors       = ["Ryan Stout"]
   spec.email         = ["ryanstout@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{A direct to s3 file uploader}
   spec.homepage      = ""
   spec.license       = "MIT"
 
@@ -19,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'aws-sdk', '~> 2.1.15'
-  spec.add_development_dependency "volt", "~> 0.9.5.0"
+  spec.add_dependency 'volt', '~> 0.9.6'
   spec.add_development_dependency 'rspec', '~> 3.2.0'
   spec.add_development_dependency "rake"
 end
